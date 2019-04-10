@@ -439,6 +439,11 @@ double ParticleBunch::GetParticleLifetime() const
 	return 0;
 }
 
+double ParticleBunch::GetParticleCharge() const
+{
+	return GetChargeSign();
+}
+
 //MPI code
 #ifdef ENABLE_MPI
 

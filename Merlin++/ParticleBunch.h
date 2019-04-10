@@ -249,6 +249,9 @@ public:
 	 */
 	virtual double GetParticleLifetime() const;
 
+	/// Charge of an individual particle
+	virtual double GetParticleCharge() const;
+
 #ifdef ENABLE_MPI
 	/**
 	 * Destructor - cleans up MPI code
