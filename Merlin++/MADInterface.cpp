@@ -53,16 +53,16 @@ double factorial(int n)
 }
 
 // Class MADInterface
-MADInterface::MADInterface(const string& madFileName, double P0) :
-	momentum(P0), filename(madFileName)
+MADInterface::MADInterface(const string& madFileName, double P0, double q) :
+	momentum(P0), charge(q), filename(madFileName)
 {
 	infile = make_unique<ifstream>(madFileName);
 	ifs = infile.get();
 	init();
 }
 
-MADInterface::MADInterface(std::istream *in, double P0) :
-	momentum(P0), filename("std::istream"), ifs(in)
+MADInterface::MADInterface(std::istream *in, double P0, double q) :
+	momentum(P0), charge(q), filename("std::istream"), ifs(in)
 {
 	init();
 }
@@ -128,7 +128,7 @@ AcceleratorModel* MADInterface::ConstructModel()
 	}
 
 	TypeFactory* factory = new TypeFactory();
-	double brho = momentum / eV / SpeedOfLight;
+	double brho = momentum / eV / SpeedOfLight / charge;
 
 	//Loop over all components
 	for(size_t i = 0; i < MADinput->Length(); ++i)
@@ -174,7 +174,7 @@ AcceleratorModel* MADInterface::ConstructModel()
 		if(inc_sr && (type == "SBEND" || type == "RBEND"))
 		{
 			momentum -= SRdE(MADinput->Get_d("ANGLE", i) / length, length, momentum);
-			brho = momentum / eV / SpeedOfLight;
+			brho = momentum / eV / SpeedOfLight / charge;
 		}
 
 		for(auto component : components)
