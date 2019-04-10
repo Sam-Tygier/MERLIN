@@ -38,15 +38,17 @@ class MADInterface
 public:
 	/**
 	 *  Constructor taking the name of the MAD optics file, and
-	 *  the momentum in GeV/c.
+	 *  the momentum in GeV/c. Optionally the particle charge can be given
+	 *  in elementary charge units.
 	 */
-	MADInterface(const std::string& madFileName, double P0);
+	MADInterface(const std::string& madFileName, double P0, double q = 1);
 
 	/**
 	 *  Constructor taking an input stream of a MAD optics file, and
-	 *  the momentum in GeV/c.
+	 *  the momentum in GeV/c. Optionally the particle charge can be given
+	 *  in elementary charge units.
 	 */
-	MADInterface(std::istream *in, double P0);
+	MADInterface(std::istream *in, double P0, double q = 1);
 
 	/**
 	 *  Destructor
@@ -163,6 +165,7 @@ public:
 	}
 
 	double momentum;
+	double charge;
 	bool inc_sr = false;
 	bool flatLattice = false;
 	double z = 0;   ///Distance along the lattice
