@@ -223,9 +223,9 @@ void SectorBendCI::TrackStep(double ds)
 	double h = (*currentComponent).GetGeometry().GetCurvature();
 	MultipoleField& field = (*currentComponent).GetField();
 	const double P0 = (*currentBunch).GetReferenceMomentum();
-	const double q = (*currentBunch).GetChargeSign();
+	const double q = (*currentBunch).GetParticleCharge();
 	const double Pref = (*currentComponent).GetMatchedMomentum(q);
-	const double brho = P0 / eV / SpeedOfLight;
+	const double brho = P0 / eV / SpeedOfLight / q;
 	int np = field.HighestMultipole();
 
 	assert(Pref > 0);

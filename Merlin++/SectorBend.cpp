@@ -89,7 +89,7 @@ double SectorBend::GetMatchedMomentum(double q) const
 	double h = GetGeometry().GetCurvature();
 	double By = GetField().GetCoefficient(0).real();
 	By *= GetField().GetFieldScale();
-	return 1.0e-09 * SpeedOfLight * By / h / q;
+	return 1.0e-09 * SpeedOfLight * By / h * q;
 }
 
 double SectorBend::GetB1() const
