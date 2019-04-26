@@ -27,6 +27,16 @@ int RectMultipole::GetIndex() const
 	return ID;
 }
 
+const string& RectMultipole::GetType() const
+{
+	_TYPESTR(RectMultipole)
+}
+
+ModelElement* RectMultipole::Copy() const
+{
+	return new RectMultipole(*this);
+}
+
 void RectMultipole::PrepareTracker(ComponentTracker& aTracker)
 {
 	_PREPTRACK(aTracker, AcceleratorComponent);
