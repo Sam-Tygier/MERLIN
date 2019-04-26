@@ -8,6 +8,8 @@
 #include "RectMultipole.h"
 #include "ComponentTracker.h"
 
+using namespace std;
+
 const int RectMultipole::ID = UniqueIndex();
 
 RectMultipole::RectMultipole(const string& id, double length, int npole, double b, double r0, bool skew) :
@@ -25,6 +27,16 @@ RectMultipole::RectMultipole(const string& id, double len, int np, double b, boo
 int RectMultipole::GetIndex() const
 {
 	return ID;
+}
+
+const string& RectMultipole::GetType() const
+{
+	_TYPESTR(RectMultipole)
+}
+
+ModelElement* RectMultipole::Copy() const
+{
+	return new RectMultipole(*this);
 }
 
 void RectMultipole::PrepareTracker(ComponentTracker& aTracker)

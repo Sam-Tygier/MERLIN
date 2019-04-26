@@ -8,6 +8,8 @@
 #ifndef RectMultipole_h
 #define RectMultipole_h 1
 
+#include <string>
+
 #include "merlin_config.h"
 #include "TemplateComponents.h"
 #include "MultipoleField.h"
@@ -17,9 +19,11 @@
 class ComponentTracker;
 
 /**
- *	Abstract base class for all standard rectangular
- *	rectangular multipole magnets that are typically found
- *	in accelerator systems.
+ * Base class for all standard rectangular
+ * multipole magnets that are typically found
+ * in accelerator systems.
+ *
+ * Can be used for modelling combined multipoles.
  */
 
 class RectMultipole: public RectMultipoleField
@@ -67,8 +71,6 @@ public:
 
 	static const int ID;
 
-protected:
-
 	/**
 	 *	Constructor taking the id and the length of the magnet,
 	 *	and the definition of a single multipole component. b is
@@ -76,7 +78,7 @@ protected:
 	 *	skew==true, then a skew multipole is constructed
 	 *	(default=false).
 	 */
-	RectMultipole(const string& id, double length, int npole, double b, double r0, bool skew = false);
+	RectMultipole(const std::string& id, double length, int npole, double b, double r0, bool skew = false);
 
 	/**
 	 *	Constructor taking the id and the length of the magnet,
@@ -86,7 +88,18 @@ protected:
 	 *	skew==true, then a skew multipole is constructed
 	 *	(default=false).
 	 */
-	RectMultipole(const string& id, double len, int np, double b, bool skew = false);
+	RectMultipole(const std::string& id, double len, int np, double b, bool skew = false);
+
+	/**
+	 *	Returns the type string "SkewQuadrupole".
+	 *	@return Type string SkewQuadrupole
+	 */
+	virtual const std::string& GetType() const;
+
+	/**
+	 *	Virtual constructor.
+	 */
+	virtual ModelElement* Copy() const;
 
 private:
 	/**
