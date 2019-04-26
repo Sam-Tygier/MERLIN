@@ -279,6 +279,12 @@ public:
 	static std::vector<AcceleratorComponent*> GetInstance(DataTableRow& MADinputrow, double brho);
 };
 
+class RectMultipoleComponent: public AcceleratorComponent
+{
+public:
+	static std::vector<AcceleratorComponent*> GetInstance(DataTableRow& MADinputrow, double brho);
+};
+
 class YCorComponent: public AcceleratorComponent
 {
 public:

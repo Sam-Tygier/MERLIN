@@ -37,6 +37,18 @@ void Log(const string& tag, int depth, ostream& os)
 	os << ' ' << tag << endl;
 }
 
+const vector<string> normal_coef_names = {"K0L", "K1L", "K2L", "K3L", "K4L"};
+const vector<string> skew_coef_names = {"KSL", "K1S", "K2S", "K3S", "K4S"};
+
+double factorial(int n)
+{
+	double f = n--;
+	while(n > 1)
+	{
+		f *= n--;
+	}
+	return (f == 0) ? 1 : f;
+}
 }
 
 // Class MADInterface
@@ -204,21 +216,41 @@ void MADInterface::TypeOverrides(DataTableRow& MADinputrow)
 		MADinputrow.Set_s("KEYWORD", "SBEND");
 	if(single_cell_rf && MADinputrow.Get_s("KEYWORD") == "RFCAVITY")
 		MADinputrow.Set_s("KEYWORD", "RFCAVITY_SingleCell");
+	if(keyword == "MULTIPOLE")
+	{
+		MADinputrow.Set_s("KEYWORD", GetMutipoleType(MADinputrow));
+	}
 }
 
 string MADInterface::GetMutipoleType(DataTableRow& MADinputrow)
 {
-	if(!MADinputrow.Get_d("K0L"))
-		return "SBEND";
-	if(!MADinputrow.Get_d("K1L"))
-		return "QUADRUPOLE";
-	if(!MADinputrow.Get_d("K2L"))
-		return "SEXTUPOLE";
-	if(!MADinputrow.Get_d("K3L"))
-		return "OCTUPOLE";
-	if(!MADinputrow.Get_d("K4L"))
-		return "DECAPOLE";
-	return "DRIFT";
+	int lowest_normal_coef = -1;
+	int coef_count = 0;
+
+	for(int n = normal_coef_names.size() - 1; n >= 0; n--)
+	{
+		if(MADinputrow.Get_d(normal_coef_names[n]) != 0)
+		{
+			coef_count++;
+			lowest_normal_coef = n;
+		}
+		if(MADinputrow.HasCol(skew_coef_names[n]) && MADinputrow.Get_d(skew_coef_names[n]) != 0)
+		{
+			cout << "Skew multiples not implemented in MADInterface" << endl;
+			return "NOTIMPLEMENTED";
+		}
+	}
+
+	if(coef_count == 0)
+		return "DRIFT";
+	if(MADinputrow.Get_d("L") == 0)
+		return "MULTIPOLE";
+	if(coef_count == 1 and MADinputrow.Get_d("L") != 0)
+	{
+		return vector<string>{"SBEND", "QUADRUPOLE", "SEXTUPOLE", "OCTUPOLE", "DECAPOLE"}[lowest_normal_coef];
+	}
+
+	return "NOTIMPLEMENTED";
 }
 
 void MADInterface::ConstructNewFrame(const string& name)
@@ -462,6 +494,26 @@ vector<AcceleratorComponent*> OctupoleComponent::GetInstance(DataTableRow& MADin
 	return {new Octupole(name, length, brho * k3l / length)};
 }
 
+vector<AcceleratorComponent*> RectMultipoleComponent::GetInstance(DataTableRow& MADinputrow, double brho)
+{
+	const string& name = MADinputrow.Get_s("NAME");
+	double length = MADinputrow.Get_d("L");
+	auto elem = new RectMultipole(name, length, 0, 1); // needs a value as everything scales from B0
+	MultipoleField& field = elem->GetField();
+	field.SetComponent(0, 0); // Need to unset 0th coef, as it is scaled from B0
+
+	if(length == 0)
+		length = 1;
+	for(size_t n = 0; n < normal_coef_names.size(); n++)
+	{
+		double k = MADinputrow.Get_d(normal_coef_names[n]);
+		if(k != 0)
+			field.SetComponent(n, k * brho / length / factorial(n));
+	}
+
+	return {elem};
+}
+
 vector<AcceleratorComponent*> YCorComponent::GetInstance(DataTableRow& MADinputrow, double brho)
 {
 	const string& name = MADinputrow.Get_s("NAME");
@@ -638,6 +690,8 @@ vector<AcceleratorComponent*> TypeFactory::GetInstance(DataTableRow& MADinputrow
 	{
 		return (*itr->second)(MADinputrow, brho);
 	}
+	cout << "TypeFactory::GetInstance: Could not make element " << MADinputrow.Get_s("NAME") << " type " << type
+		 << endl;
 	return {};
 }
 
@@ -651,6 +705,7 @@ TypeFactoryInit::TypeFactoryInit()
 	TypeFactory::componentTypes["SEXTUPOLE"] = &SextupoleComponent::GetInstance;
 	TypeFactory::componentTypes["SKEWSEXT"] = &SkewSextupoleComponent::GetInstance;
 	TypeFactory::componentTypes["OCTUPOLE"] = &OctupoleComponent::GetInstance;
+	TypeFactory::componentTypes["MULTIPOLE"] = &RectMultipoleComponent::GetInstance;
 	TypeFactory::componentTypes["YCOR"] = &YCorComponent::GetInstance;
 	TypeFactory::componentTypes["XCOR"] = &XCorComponent::GetInstance;
 	TypeFactory::componentTypes["VKICKER"] = &VKickerComponent::GetInstance;

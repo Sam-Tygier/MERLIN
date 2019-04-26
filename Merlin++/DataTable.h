@@ -330,6 +330,10 @@ public:
 		dt->SetWithStr(col_name, pos, x);
 	}
 
+	bool HasCol(const std::string col_name) const
+	{
+		return dt->HasCol(col_name);
+	}
 private:
 	DataTable * dt;
 	size_t pos;
@@ -371,6 +375,10 @@ public:
 		return dt->GetAsStr(col_name, pos);
 	}
 
+	bool HasCol(const std::string col_name) const
+	{
+		return dt->HasCol(col_name);
+	}
 private:
 	const DataTable * dt;
 	size_t pos;
