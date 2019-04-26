@@ -751,7 +751,7 @@ void SectorBendCI::TrackStep(double ds)
 	assert(Pref > 0);
 
 	const Complex b0 = field.GetCoefficient(0);
-	const Complex K1 = (np > 0) ? q * field.GetKn(1, brho) : Complex(0);
+	const Complex K1 = (np > 0) ? field.GetKn(1, brho) : Complex(0);
 
 	// We need to split the magnet for a kick if the following is true
 	bool splitMagnet = b0.imag() != 0 || K1.imag() != 0 || np > 1;
@@ -827,7 +827,6 @@ void SectorBendCI::TrackStep(double ds)
 // 07.12.15 HR: Added thin multipole and MultipoleKick fixes
 void RectMultipoleCI::TrackStep(double ds)
 {
-
 	// Here we use a matrix to represent the quadrupole term, and a
 	// single kick at the centre of the element for the other multipoles,
 	// including any dipole term.
@@ -836,8 +835,8 @@ void RectMultipoleCI::TrackStep(double ds)
 	//if(ds==0) return;
 
 	double P0 = currentBunch->GetReferenceMomentum();
-	double q = currentBunch->GetChargeSign();
-	double brho = P0 / eV / SpeedOfLight;
+	double q = currentBunch->GetParticleCharge();
+	double brho = P0 / eV / SpeedOfLight / q;
 
 	MultipoleField& field = currentComponent->GetField();
 
@@ -850,10 +849,9 @@ void RectMultipoleCI::TrackStep(double ds)
 	}
 	CHK_ZERO(ds);
 
-	const Complex cK1 = q * field.GetKn(1, brho);
+	const Complex cK1 = field.GetKn(1, brho);
 	bool splitMagnet = field.GetCoefficient(0) != 0.0 || field.HighestMultipole() > 1;
 	double len = splitMagnet ? ds / 2 : ds;
-
 	RdpMtrx M(2);
 
 	if(cK1 != 0.0)
