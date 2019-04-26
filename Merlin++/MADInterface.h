@@ -294,6 +294,13 @@ public:
 		id);
 };
 
+class RectMultipoleComponent: public AcceleratorComponent
+{
+public:
+	static vector<AcceleratorComponent*> GetInstance(unique_ptr<DataTable>& MADinput, double brho, size_t
+		id);
+};
+
 class YCorComponent: public AcceleratorComponent
 {
 public:

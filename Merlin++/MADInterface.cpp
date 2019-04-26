@@ -38,6 +38,8 @@ void Log(const string& tag, int depth, ostream& os)
 	os << ' ' << tag << endl;
 }
 
+const vector<string> normal_coef_names = {"K0L", "K1L", "K2L", "K3L", "K4L"};
+const vector<string> skew_coef_names = {"KSL", "K1S", "K2S", "K3S", "K4S"};
 }
 
 // Class MADInterface
@@ -205,21 +207,41 @@ void MADInterface::TypeOverrides(unique_ptr<DataTable>& MADinput, size_t index)
 		MADinput->Set_s("KEYWORD", index, "SBEND");
 	if(single_cell_rf && MADinput->Get_s("KEYWORD", index) == "RFCAVITY")
 		MADinput->Set_s("KEYWORD", index, "RFCAVITY_SingleCell");
+	if(keyword == "MULTIPOLE")
+	{
+		MADinput->Set_s("KEYWORD", index, GetMutipoleType(MADinput, index));
+	}
 }
 
 string MADInterface::GetMutipoleType(unique_ptr<DataTable>& MADinput, size_t index)
 {
-	if(!MADinput->Get_d("K0L", index))
-		return "SBEND";
-	if(!MADinput->Get_d("K1L", index))
-		return "QUADRUPOLE";
-	if(!MADinput->Get_d("K2L", index))
-		return "SEXTUPOLE";
-	if(!MADinput->Get_d("K3L", index))
-		return "OCTUPOLE";
-	if(!MADinput->Get_d("K4L", index))
-		return "DECAPOLE";
-	return "DRIFT";
+	int lowest_normal_coef = -1;
+	int coef_count = 0;
+
+	for(int n = normal_coef_names.size() - 1; n >= 0; n--)
+	{
+		if(MADinput->Get_d(normal_coef_names[n], index) != 0)
+		{
+			coef_count++;
+			lowest_normal_coef = n;
+		}
+		if(MADinput->HasCol(skew_coef_names[n]) && MADinput->Get_d(skew_coef_names[n], index) != 0)
+		{
+			cout << "Skew multiples not implemented in MADInterface" << endl;
+			return "NOTIMPLEMENTED";
+		}
+	}
+
+	if(coef_count == 0)
+		return "DRIFT";
+	if(MADinput->Get_d("L", index) == 0)
+		return "MULTIPOLE";
+	if(coef_count == 1 and MADinput->Get_d("L", index) != 0)
+	{
+		return vector<string>{"SBEND", "QUADRUPOLE", "SEXTUPOLE", "OCTUPOLE", "DECAPOLE"}[lowest_normal_coef];
+	}
+
+	return "NOTIMPLEMENTED";
 }
 
 void MADInterface::ConstructNewFrame(const string& name)
@@ -427,7 +449,6 @@ vector<AcceleratorComponent*> QuadrupoleComponent::GetInstance(unique_ptr<DataTa
 	const string& name = MADinput->Get_s("NAME", id);
 	double length = MADinput->Get_d("L", id);
 	double k1l = MADinput->Get_d("K1L", id);
-
 	return {new Quadrupole(name, length, brho * k1l / length)};
 }
 
@@ -470,6 +491,28 @@ vector<AcceleratorComponent*> OctupoleComponent::GetInstance(unique_ptr<DataTabl
 	double k3l = MADinput->Get_d("K3L", id);
 
 	return {new Octupole(name, length, brho * k3l / length)};
+}
+
+vector<AcceleratorComponent*> RectMultipoleComponent::GetInstance(unique_ptr<DataTable>& MADinput, double
+	brho, size_t
+	id)
+{
+	const string& name = MADinput->Get_s("NAME", id);
+	double length = MADinput->Get_d("L", id);
+	auto elem = new RectMultipole(name, length, 0, 1); // needs a value as everything scales from B0
+	MultipoleField& field = elem->GetField();
+	field.SetComponent(0, 0); // Need to unset 0th coef, as it is scaled from B0
+
+	if(length == 0)
+		length = 1;
+	for(size_t n = 0; n < normal_coef_names.size(); n++)
+	{
+		double k = MADinput->Get_d(normal_coef_names[n], id);
+		if(k != 0)
+			field.SetComponent(n, k * brho / length);
+	}
+
+	return {elem};
 }
 
 vector<AcceleratorComponent*> YCorComponent::GetInstance(unique_ptr<DataTable>& MADinput, double brho, size_t id)
@@ -661,6 +704,8 @@ vector<AcceleratorComponent*> TypeFactory::GetInstance(unique_ptr<DataTable>& MA
 	{
 		return (*itr->second)(MADinput, brho, id);
 	}
+	cout << "TypeFactory::GetInstance: Could not make element " << MADinput->Get_s("NAME", id) << " type " << type
+		 << endl;
 	return {};
 }
 
@@ -674,6 +719,7 @@ TypeFactoryInit::TypeFactoryInit()
 	TypeFactory::componentTypes["SEXTUPOLE"] = &SextupoleComponent::GetInstance;
 	TypeFactory::componentTypes["SKEWSEXT"] = &SkewSextupoleComponent::GetInstance;
 	TypeFactory::componentTypes["OCTUPOLE"] = &OctupoleComponent::GetInstance;
+	TypeFactory::componentTypes["MULTIPOLE"] = &RectMultipoleComponent::GetInstance;
 	TypeFactory::componentTypes["YCOR"] = &YCorComponent::GetInstance;
 	TypeFactory::componentTypes["XCOR"] = &XCorComponent::GetInstance;
 	TypeFactory::componentTypes["VKICKER"] = &VKickerComponent::GetInstance;
