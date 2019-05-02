@@ -234,16 +234,14 @@ void SectorBendCI::TrackStep(double ds)
 	assert(Pref > 0);
 
 	const Complex b0 = field.GetCoefficient(0);
-	const Complex K1 = (np > 0) ? q * field.GetKn(1, brho) : Complex(0);
+	const Complex K1 = (np > 0) ? field.GetKn(1, brho) : Complex(0);
 
 	// we need to split the magnet for a kick if the
 	// following is true
 	bool splitMagnet = b0.imag() != 0 || K1.imag() != 0 || np > 1;
 	double len = splitMagnet ? ds / 2.0 : ds;
-
 	// Construct the second-order map
 	RTMap* M = (abs(K1) == 0) ? SectorBendTM(len, h, gamma) : GenSectorBendTM(len, h, K1.real(), 0);
-
 	if(fequal(P0, Pref, REL_ENGY_TOL))
 	{
 		ApplyMapToBunch(*currentBunch, M);
@@ -252,7 +250,6 @@ void SectorBendCI::TrackStep(double ds)
 	{
 		ApplyMapToBunch(*currentBunch, M, P0 / Pref);
 	}
-
 	// Now if we have split the magnet, we need to
 	// apply the kick approximation, and then
 	// re-apply the map M
@@ -317,7 +314,8 @@ void SectorBendCI::ApplyPoleFaceRotation(const SectorBend::PoleFace* pf)
 #define _PFV(p, v) !(p) ? 0 : p->v;
 
 	const double P0 = currentBunch->GetReferenceMomentum();
-	const double brho = P0 / eV / SpeedOfLight;
+	const double q = currentBunch->GetParticleCharge();
+	const double brho = P0 / eV / SpeedOfLight / q;
 	const double h = (*currentComponent).GetGeometry().GetCurvature();
 	const double k = (*currentComponent).GetField().GetKn(1, brho).real();
 
@@ -340,25 +338,23 @@ void RectMultipoleCI::TrackStep(double ds)
 	using namespace TLAS;
 
 	double P0 = (*currentBunch).GetReferenceMomentum();
-	double q = (*currentBunch).GetChargeSign();
-	double brho = P0 / eV / SpeedOfLight;
+	double q = (*currentBunch).GetParticleCharge();
+	double brho = P0 / eV / SpeedOfLight / q;
 	MultipoleField& field = (*currentComponent).GetField();
 
 	// we now support thin-lens kicks (this has been added to support
 	// thin-lens corrector dipoles)
-
 	if((*currentComponent).GetLength() == 0 && ds == 0 && !field.IsNullField())
 	{
 		// treat field as integrated strength
 		for_each((*currentBunch).begin(), (*currentBunch).end(), MultipoleKick(field, 1.0, P0, q));
 		return;
 	}
-
 	CHK_ZERO(ds);
 
-	const Complex ch = q * field.GetKn(0, brho);
-	const Complex cK1 = q * field.GetKn(1, brho);
-	const Complex cK2 = q * field.GetKn(2, brho);
+	const Complex ch = field.GetKn(0, brho);
+	const Complex cK1 = field.GetKn(1, brho);
+	const Complex cK2 = field.GetKn(2, brho);
 	int np = field.HighestMultipole();
 
 	// We split the magnet for a multipole kick if:
