@@ -199,7 +199,7 @@ void SectorBendCI::TrackStep(double ds)
 	assert(Pref > 0);
 
 	const Complex b0 = field.GetCoefficient(0);
-	const Complex K1 = (np > 0) ? q * field.GetKn(1, brho) : Complex(0);
+	const Complex K1 = (np > 0) ? field.GetKn(1, brho) : Complex(0);
 
 	// we need to split the magnet for a kick if the
 	// following is true
@@ -283,12 +283,12 @@ void RectMultipoleCI::TrackStep(double ds)
 	CHK_ZERO(ds);
 
 	double P0 = currentBunch->GetReferenceMomentum();
-	double q = currentBunch->GetChargeSign();
-	double brho = P0 / eV / SpeedOfLight;
+	double q = currentBunch->GetParticleCharge();
+	double brho = P0 / eV / SpeedOfLight / q;
 
 	MultipoleField& field = currentComponent->GetField();
 
-	const Complex cK1 = q * field.GetKn(1, brho);
+	const Complex cK1 = field.GetKn(1, brho);
 	bool splitMagnet = field.GetCoefficient(0) != 0.0 || field.HighestMultipole() > 1;
 	double len = splitMagnet ? ds / 2 : ds;
 
@@ -409,8 +409,8 @@ void SolenoidCI::TrackStep(double ds)
 
 	CHK_ZERO(ds);
 	double P0 = currentBunch->GetReferenceMomentum();
-	double q = currentBunch->GetChargeSign();
-	double brho = P0 / eV / SpeedOfLight;
+	double q = currentBunch->GetParticleCharge();
+	double brho = P0 / eV / SpeedOfLight / q;
 
 	double Bz = currentComponent->GetBz();
 
@@ -423,7 +423,7 @@ void SolenoidCI::TrackStep(double ds)
 		if(linear_map_only)
 		{
 			RMtrx M(2);
-			TransportMatrix::Solenoid(ds, q * Bz / brho, 0, true, true, M.R);
+			TransportMatrix::Solenoid(ds, Bz / brho, 0, true, true, M.R);
 			M.Apply(currentBunch->GetParticles());
 		}
 		else
@@ -432,7 +432,7 @@ void SolenoidCI::TrackStep(double ds)
 			for(ParticleBunch::iterator p = currentBunch->begin(); p != currentBunch->end(); p++)
 			{
 				RMtrx M(2);
-				TransportMatrix::Solenoid(ds, q * Bz / brho / (1 + p->dp()), 0, true, true, M.R);
+				TransportMatrix::Solenoid(ds, Bz / brho / (1 + p->dp()), 0, true, true, M.R);
 				M.Apply(*p);
 			}
 		}
