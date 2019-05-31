@@ -34,7 +34,7 @@ typedef vector<LatticeFunction*> vectorlfn;
 class LatticeFunctionTable
 {
 public:
-	LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum);
+	LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum, double charge = 1, double mass = 0);
 	~LatticeFunctionTable();
 	void AddFunction(int i, int j, int k);
 	void UseDefaultFunctions();
@@ -68,6 +68,8 @@ public:
 private:
 	AcceleratorModel* theModel;
 	double p0;
+	double q0;
+	double m0;
 	double delta;
 	double bendscale;
 	bool symplectify;

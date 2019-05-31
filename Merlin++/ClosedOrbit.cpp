@@ -5,12 +5,16 @@
  * This file is derived from software bearing the copyright notice in merlin4_copyright.txt
  */
 
+#include <memory>
+
 #include "ParticleBunch.h"
+#include "IonBunch.h"
 #include "SynchRadParticleProcess.h"
 #include "RingDeltaTProcess.h"
 #include "ClosedOrbit.h"
 #include "TLASimp.h"
 
+#define DEBUG_CLOSED_ORBIT
 #ifdef DEBUG_CLOSED_ORBIT
 #include "NANCheckProcess.h"
 #endif
@@ -19,8 +23,9 @@ using namespace std;
 using namespace TLAS;
 using namespace ParticleTracking;
 
-ClosedOrbit::ClosedOrbit(AcceleratorModel* aModel, double refMomentum) :
-	theModel(aModel), p0(refMomentum), transverseOnly(false), radiation(false), useFullAcc(false), delta(1.0e-9), tol(
+ClosedOrbit::ClosedOrbit(AcceleratorModel* aModel, double refMomentum, double charge, double mass) :
+	theModel(aModel), p0(refMomentum), q0(charge), m0(mass), transverseOnly(false), radiation(false), useFullAcc(false),
+	delta(1.0e-9), tol(
 		1.0e-26), max_iter(20), bendscale(0), theTracker(new ParticleTracker)
 {
 }
@@ -91,16 +96,26 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 {
 	const int cpt = transverseOnly ? 4 : 6;
 
-	ParticleBunch bunch(p0, 1.0);
+	unique_ptr<ParticleBunch> bunch;
+	if(q0 == 1)
+	{
+		cout << "ClosedOrbit::FindClosedOrbit ParticleBunch" << endl;
+		bunch = make_unique<ParticleBunch>(p0, 1.0);
+	}
+	else
+	{
+		cout << "ClosedOrbit::FindClosedOrbit IonBunch " << p0 << " " << q0 << " " << m0 << endl;
+		bunch = make_unique<IonBunch>(p0, q0, m0, 1.0);
+	}
 	int k = 0;
 	for(k = 0; k < cpt + 1; k++)
 	{
-		bunch.push_back(particle);
+		bunch->push_back(particle);
 	}
 
 	//	ParticleTracker tracker(theModel->GetRing(ncpt), &bunch, true);
 	theTracker->SetRing(theModel->GetRing(ncpt));
-	theTracker->SetInitialBunch(&bunch, false);
+	theTracker->SetInitialBunch(bunch.get(), false);
 
 	// move the declaration of these pointers
 	// outside respective if blocks so we
@@ -144,6 +159,7 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 #ifdef DEBUG_CLOSED_ORBIT
 	cout << "Finding closed orbit:" << endl;
 	NANproc = new NANCheckProcess();
+	NANproc->SetDetailed(true);
 	theTracker->AddProcess(NANproc);
 #endif
 
@@ -155,7 +171,7 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 		ParticleBunch::iterator ip;
 
 		k = 0;
-		for(ip = bunch.begin(); ip != bunch.end(); ip++, k++)
+		for(ip = bunch->begin(); ip != bunch->end(); ip++, k++)
 		{
 			*ip = particle;
 			if(k > 0)
@@ -164,9 +180,10 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 			}
 		}
 
-		theTracker->Run();
-
-		ip = theTracker->GetTrackedBunch().begin();
+		//theTracker->Run();
+		theTracker->Track(bunch.get());
+		//ip = theTracker->GetTrackedBunch().begin();
+		ip = bunch->begin();
 		const Particle& p_ref = *ip++; // reference particle
 
 #ifdef DEBUG_CLOSED_ORBIT

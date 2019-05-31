@@ -17,7 +17,7 @@ using namespace TLAS;
 class TransferMatrix
 {
 public:
-	TransferMatrix(AcceleratorModel* aModel, double refMomentum);
+	TransferMatrix(AcceleratorModel* aModel, double refMomentum,  double charge = 1, double mass = 0);
 
 	void FindTM(RealMatrix& M);
 	void FindTM(RealMatrix& M, PSvector& orbit);
@@ -35,6 +35,8 @@ public:
 private:
 	AcceleratorModel* theModel;
 	double p0;
+	double q0;
+	double m0;
 
 	bool radiation;
 	int obspnt;

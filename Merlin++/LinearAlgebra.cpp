@@ -178,15 +178,43 @@ bool EigenSystem(RealMatrix& t, ComplexVector& eigenvalues, ComplexMatrix& eigen
 			double prox = 1.0;
 			int iter = 0;
 
-			while(prox > 1.0e-16 && iter < 100)
+			while(prox > 1.2e-16 && iter < 100)
 			{
+
+				//cout << "mp: ";
 				for(n = 0; n < 6; n++)
 				{
 					mp(n, n) = m(n, n) - lambda;
+					//cout << mp(n, n) << " ";
 				}
+				//cout << endl;
+
+				//cout << "Test: ";
+				ComplexVector Check(0., 6);
+				for(int i = 0; i < 6; i++)
+					for(int j = 0; j < 6; j++)
+						Check(i) += mp(i, j) * b(j);
+				double test = 0;
+				for(int i = 0; i < 6; i++)
+				{
+					test += pow(ABS(Check(i) - b(i)), 2);
+					//cout << pow(ABS(Check(i) - b(i)), 2) << " ";
+				}
+				//cout << " Total: " << test <<endl;
 
 				ComplexMatrix minv(mp);
-				prox = Inverse(minv);
+				//cout << "mp" << mp << endl;
+				try
+				{
+					prox = Inverse(minv);
+				}
+				catch(TLAS::SingularMatrix)
+				{
+					cout << "Got TLAS::SingularMatrix. Solved?!?" << endl;
+					prox = 0;
+				}
+
+				//cout << "prox = " << prox << endl;
 
 				ComplexVector y(6);
 				for(row = 0; row < 6; row++)

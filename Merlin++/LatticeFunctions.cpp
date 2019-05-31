@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include "ParticleBunch.h"
+#include "IonBunch.h"
 #include "ParticleTracker.h"
 #include "RingDeltaTProcess.h"
 #include "AcceleratorModel.h"
@@ -95,8 +96,9 @@ void LatticeFunction::Derivative(LatticeFunction* lfnM, LatticeFunction* lfnP, d
 	}
 }
 
-LatticeFunctionTable::LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum) :
-	theModel(aModel), p0(refMomentum), delta(1.0e-8), bendscale(0), symplectify(false), orbitonly(true)
+LatticeFunctionTable::LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum, double charge, double mass) :
+	theModel(aModel), p0(refMomentum), q0(charge), m0(mass), delta(1.0e-8), bendscale(0), symplectify(false), orbitonly(
+		true)
 {
 	UseDefaultFunctions();
 }
@@ -163,11 +165,11 @@ void LatticeFunctionTable::UseDefaultFunctions()
 	AddFunction(1, 2, 1); // -alfa_x
 	AddFunction(3, 3, 2); // beta_y
 	AddFunction(3, 4, 2); // -alfa_y
-    AddFunction(1, 6, 3); // Dx  = (1,6,3)/(6,6,3)
-    AddFunction(2, 6, 3); // Dpx = (2,6,3)/(6,6,3)
-    AddFunction(3, 6, 3);
-    AddFunction(4, 6, 3);
-    AddFunction(6, 6, 3);
+	AddFunction(1, 6, 3); // Dx  = (1,6,3)/(6,6,3)
+	AddFunction(2, 6, 3); // Dpx = (2,6,3)/(6,6,3)
+	AddFunction(3, 6, 3);
+	AddFunction(4, 6, 3);
+	AddFunction(6, 6, 3);
 }
 
 void LatticeFunctionTable::UseOrbitFunctions()
@@ -328,11 +330,13 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	}
 	else
 	{
-		ClosedOrbit co(theModel, p0);
+		cout << "Calling ClosedOrbit" << endl;
+		ClosedOrbit co(theModel, p0, q0, m0);
 		co.SetDelta(delta);
 		co.TransverseOnly(true);
 		co.ScaleBendPathLength(cscale);
 		co.FindClosedOrbit(p);
+		cout << "ClosedOrbit done" << endl;
 	}
 
 	RealMatrix M(6);
@@ -342,7 +346,7 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	}
 	else
 	{
-		TransferMatrix tm(theModel, p0);
+		TransferMatrix tm(theModel, p0, q0, m0);
 		tm.SetDelta(delta);
 		tm.ScaleBendPathLength(cscale);
 		tm.FindTM(M, p);
@@ -408,15 +412,25 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	nfile << endl;
 	MatrixForm(N, nfile, OPFormat().precision(6).fixed());
 
-	ParticleBunch* particle = new ParticleBunch(p0, 1.0);
+	ParticleBunch* particle;
+	if(q0 == 1)
+	{
+		cout << "LatticeFunctionTable::DoCalculate ParticleBunch" << endl;
+		particle = new ParticleBunch(p0, 1.0);
+	}
+	else
+	{
+		cout << "LatticeFunctionTable::DoCalculate IonBunch" << endl;
+		particle = new IonBunch(p0, q0, m0, 1.0);
+	}
 	particle->push_back(p);
 	particle->push_back(p);
 
 	for(row = 0; row < Nsize; row++)
 	{
-		Particle q = p;
-		q[row] += delta;
-		particle->push_back(q);
+		Particle p2 = p;
+		p2[row] += delta;
+		particle->push_back(p2);
 	}
 
 	ParticleTracker tracker(theModel->GetBeamline(), particle);
@@ -430,7 +444,7 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 
 	bool loop = true;
 	bool isMore = true;
-	tracker.InitStepper();
+	tracker.InitStepper(particle);
 
 	RealMatrix M1 = IdentityMatrix(Nsize);
 	RealMatrix M2(Nsize);
@@ -499,7 +513,6 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	ofstream mfile("TransferMatrix.dat");
 	MatrixForm(M2, mfile, OPFormat().precision(6).fixed());
 
-	delete particle;
 	return p.dp();
 }
 
@@ -514,16 +527,24 @@ double LatticeFunctionTable::DoCalculateOrbitOnly(double cscale, PSvector* pInit
 	}
 	else
 	{
-		ClosedOrbit co(theModel, p0);
+		ClosedOrbit co(theModel, p0, q0, m0);
 		co.SetDelta(delta);
 		co.ScaleBendPathLength(cscale);
 		co.FindClosedOrbit(p);
 	}
 
-	ParticleBunch* particle = new ParticleBunch(p0, 1.0);
+	unique_ptr<ParticleBunch> particle;
+	if(q0 == 1)
+	{
+		particle = make_unique<ParticleBunch>(p0, 1.0);
+	}
+	else
+	{
+		particle = make_unique<IonBunch>(p0, q0, m0, 1.0);
+	}
 	particle->push_back(p);
 
-	ParticleTracker tracker(theModel->GetBeamline(), particle);
+	ParticleTracker tracker(theModel->GetBeamline(), particle.get());
 
 	if(cscale)
 	{

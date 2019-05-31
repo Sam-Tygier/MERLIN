@@ -6,6 +6,7 @@
  */
 
 #include "ParticleBunch.h"
+#include "IonBunch.h"
 #include "ParticleTracker.h"
 #include "SynchRadParticleProcess.h"
 #include "RingDeltaTProcess.h"
@@ -15,8 +16,8 @@
 
 using namespace ParticleTracking;
 
-TransferMatrix::TransferMatrix(AcceleratorModel* aModel, double refMomentum) :
-	theModel(aModel), p0(refMomentum), radiation(false), obspnt(0), delta(1.0e-9), bendscale(0)
+TransferMatrix::TransferMatrix(AcceleratorModel* aModel, double refMomentum,  double charge, double mass) :
+	theModel(aModel), p0(refMomentum), q0(charge), m0(mass), radiation(false), obspnt(0), delta(1.0e-9), bendscale(0)
 {
 }
 
@@ -59,7 +60,7 @@ void TransferMatrix::ScaleBendPathLength(double scale)
 void TransferMatrix::FindTM(RealMatrix& M)
 {
 	PSvector p(0);
-	ClosedOrbit co(theModel, p0);
+	ClosedOrbit co(theModel, p0, q0, m0);
 	co.Radiation(radiation);
 
 	if(radstepsize == 0)
@@ -82,7 +83,7 @@ void TransferMatrix::FindTM(RealMatrix& M)
 
 void TransferMatrix::FindClosedOrbitTM(RealMatrix& M, PSvector& orbit)
 {
-	ClosedOrbit co(theModel, p0);
+	ClosedOrbit co(theModel, p0, q0, m0);
 	co.Radiation(radiation);
 
 	if(radstepsize == 0)
@@ -105,7 +106,17 @@ void TransferMatrix::FindClosedOrbitTM(RealMatrix& M, PSvector& orbit)
 
 void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 {
-	ParticleBunch bunch(p0, 1.0);
+	unique_ptr<ParticleBunch> bunch;
+	if(q0 == 1)
+	{
+		cout << "TransferMatrix::FindTM ParticleBunch" << endl;
+		bunch = make_unique<ParticleBunch>(p0, 1.0);
+	}
+	else
+	{
+		cout << "TransferMatrix::FindTM IonBunch" << endl;
+		bunch = make_unique<IonBunch>(p0, q0, m0, 1.0);
+	}
 	int k = 0;
 	for(k = 0; k < 7; k++)
 	{
@@ -114,12 +125,12 @@ void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 		{
 			p[k - 1] += delta;
 		}
-		bunch.push_back(p);
+		bunch->push_back(p);
 	}
 //cout <<"bunch dump 1" << endl;
 	//MatrixForm(M,std::cout,OPFormat().precision(6).fixed());
 //	bunch.Output(std::cout);
-	ParticleTracker tracker(theModel->GetRing(obspnt), &bunch, false);
+	ParticleTracker tracker(theModel->GetRing(obspnt), bunch.get(), false);
 
 	if(radiation)
 	{
@@ -145,9 +156,10 @@ void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 		tracker.AddProcess(ringdt);
 	}
 
-	tracker.Run();
+	tracker.Track(bunch.get());
 
-	ParticleBunch::const_iterator ip = tracker.GetTrackedBunch().begin();
+	//ParticleBunch::const_iterator ip = tracker.GetTrackedBunch().begin();
+	ParticleBunch::const_iterator ip = bunch->begin();
 	const Particle& pref = *ip++;
 
 	for(k = 0; k < 6; k++, ip++)

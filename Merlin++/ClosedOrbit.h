@@ -18,7 +18,7 @@ using namespace ParticleTracking;
 class ClosedOrbit
 {
 public:
-	ClosedOrbit(AcceleratorModel* aModel, double refMomentum);
+	ClosedOrbit(AcceleratorModel* aModel, double refMomentum, double charge = 1, double mass = 1);
 	~ClosedOrbit();
 
 	void FindClosedOrbit(PSvector& particle, int ncpt = 0);
@@ -48,6 +48,8 @@ public:
 private:
 	AcceleratorModel* theModel;
 	double p0;
+	double q0;
+	double m0;
 	bool transverseOnly;
 	bool radiation;
 	bool useFullAcc;
