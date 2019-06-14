@@ -50,19 +50,19 @@ public:
 	 *	total charge and the particle array. Note that on exit,
 	 *	particles is empty.
 	 */
-	ParticleBunch(double P0, double Q, PSvectorArray& particles);
+	ParticleBunch(double P0, double Q, PSvectorArray& particles, const ParticleInfo* ptype = nullptr);
 
 	/**
 	 *	Read phase space vectors from specified input stream.
 	 */
-	ParticleBunch(double P0, double Q, std::istream& is);
+	ParticleBunch(double P0, double Q, std::istream& is, const ParticleInfo* ptype = nullptr);
 
 	/**
 	 *	Constructs an empty ParticleBunch with the specified
 	 *	momentum P0 and charge per macro particle Qm (default =
 	 *	+1).
 	 */
-	ParticleBunch(double P0, double Qm = 1);
+	ParticleBunch(double P0, double Qm = 1, const ParticleInfo* ptype = nullptr);
 
 	/**
 	 * Constructs an ParticleBunch with coordinates generated from a
@@ -71,7 +71,7 @@ public:
 	 */
 
 	ParticleBunch(size_t np, const ParticleDistributionGenerator & generator, const BeamData& beam,
-		ParticleBunchFilter* filter = nullptr);
+		ParticleBunchFilter* filter = nullptr, const ParticleInfo* ptype = nullptr);
 
 	/**
 	 *	Returns the total charge (in units of e).
@@ -199,29 +199,6 @@ public:
 	 * Number of coordinates involved in our Particle type
 	 */
 	int coords;
-
-	/**
-	 * Checks if the particle type is stable or not, returns true if the particle is considered stable.
-	 *
-	 * @retval true If particle is considered stable
-	 * @retval false If particle is considered unstable
-	 */
-	virtual bool IsStable() const;
-
-	/**
-	 * Access method: Get particle mass
-	 */
-	virtual double GetParticleMass() const;
-
-	/**
-	 * Access method: Get particle mass (MeV)
-	 */
-	virtual double GetParticleMassMeV() const;
-
-	/**
-	 * Access method: Get particle lifetime
-	 */
-	virtual double GetParticleLifetime() const;
 
 #ifdef ENABLE_MPI
 	/**

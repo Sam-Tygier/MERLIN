@@ -28,7 +28,7 @@ public:
 	 *	particles is empty.
 	 */
 	ElectronBunch(double P0, double Q, PSvectorArray& particles) :
-		ParticleBunch(P0, Q, particles)
+		ParticleBunch(P0, Q, particles, &(ParticleInfoDB.at("e")))
 	{
 	}
 
@@ -36,7 +36,7 @@ public:
 	 *	Read phase space vectors from specified input stream.
 	 */
 	ElectronBunch(double P0, double Q, std::istream& is) :
-		ParticleBunch(P0, Q, is)
+		ParticleBunch(P0, Q, is, &(ParticleInfoDB.at("e")))
 	{
 	}
 
@@ -46,20 +46,15 @@ public:
 	 *	+1).
 	 */
 	ElectronBunch(double P0, double Qm = 1) :
-		ParticleBunch(P0, Qm)
+		ParticleBunch(P0, Qm, &(ParticleInfoDB.at("e")))
 	{
 	}
 
 	ElectronBunch(size_t np, const ParticleDistributionGenerator & generator, const BeamData& beam,
 		ParticleBunchFilter* filter = nullptr) :
-		ParticleBunch(np, generator, beam, filter)
+		ParticleBunch(np, generator, beam, filter, &(ParticleInfoDB.at("e")))
 	{
 	}
-
-	virtual bool IsStable() const;
-	virtual double GetParticleMass() const;
-	virtual double GetParticleMassMeV() const;
-	virtual double GetParticleLifetime() const;
 
 	void set()
 	{

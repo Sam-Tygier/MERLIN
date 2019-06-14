@@ -138,15 +138,15 @@ inline void SortArray(std::vector<T>& array)
 namespace ParticleTracking
 {
 
-ParticleBunch::ParticleBunch(double P0, double Q, PSvectorArray& particles) :
-	Bunch(P0, Q), init(false), coords((int) sizeof(PSvector) / sizeof(double)), qPerMP(Q
+ParticleBunch::ParticleBunch(double P0, double Q, PSvectorArray& particles, const ParticleInfo* ptype) :
+	Bunch(P0, Q, ptype), init(false), coords((int) sizeof(PSvector) / sizeof(double)), qPerMP(Q
 		/ particles.size()), pArray()
 {
 	pArray.swap(particles);
 }
 
-ParticleBunch::ParticleBunch(double P0, double Q, std::istream& is) :
-	Bunch(P0, Q), init(false), coords((int) sizeof(PSvector) / sizeof(double))
+ParticleBunch::ParticleBunch(double P0, double Q, std::istream& is, const ParticleInfo* ptype) :
+	Bunch(P0, Q, ptype), init(false), coords((int) sizeof(PSvector) / sizeof(double))
 {
 	PSvector p;
 	while(is >> p)
@@ -157,14 +157,14 @@ ParticleBunch::ParticleBunch(double P0, double Q, std::istream& is) :
 	qPerMP = Q / size();
 }
 
-ParticleBunch::ParticleBunch(double P0, double Qm) :
-	Bunch(P0, Qm), init(false), coords((int) sizeof(PSvector) / sizeof(double)), qPerMP(Qm)
+ParticleBunch::ParticleBunch(double P0, double Qm, const ParticleInfo* ptype) :
+	Bunch(P0, Qm, ptype), init(false), coords((int) sizeof(PSvector) / sizeof(double)), qPerMP(Qm)
 {
 }
 
 ParticleBunch::ParticleBunch(size_t np, const ParticleDistributionGenerator& generator, const BeamData& beam,
-	ParticleBunchFilter* filter) :
-	ParticleBunch(beam.p0, beam.charge)
+	ParticleBunchFilter* filter, const ParticleInfo* ptype) :
+	ParticleBunch(beam.p0, beam.charge, ptype)
 {
 	RMtrx M;
 	M.R = NormalTransform(beam);
@@ -410,26 +410,6 @@ void ParticleBunch::SetCentroid(const Particle& x0)
 {
 	FirstParticle() = x0;
 	SetCentroid();
-}
-
-bool ParticleBunch::IsStable() const
-{
-	return true;
-}
-
-double ParticleBunch::GetParticleMass() const
-{
-	return 0;
-}
-
-double ParticleBunch::GetParticleMassMeV() const
-{
-	return 0;
-}
-
-double ParticleBunch::GetParticleLifetime() const
-{
-	return 0;
 }
 
 //MPI code
