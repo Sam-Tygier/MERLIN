@@ -9,6 +9,7 @@
 #define ProtonBunch_h 1
 
 #include "ParticleBunch.h"
+#include "ParticleInfoDB.h"
 #include <iostream>
 
 using namespace std;
@@ -29,7 +30,7 @@ public:
 	 * particles is empty.
 	 */
 	ProtonBunch(double P0, double Q, PSvectorArray& particles) :
-		ParticleBunch(P0, Q, particles)
+		ParticleBunch(P0, Q, particles, &(ParticleInfoDB.at("p")))
 	{
 	}
 
@@ -37,7 +38,7 @@ public:
 	 * Read phase space vectors from specified input stream.
 	 */
 	ProtonBunch(double P0, double Q, std::istream& is) :
-		ParticleBunch(P0, Q, is)
+		ParticleBunch(P0, Q, is, &(ParticleInfoDB.at("p")))
 	{
 	}
 
@@ -47,20 +48,15 @@ public:
 	 *  +1).
 	 */
 	ProtonBunch(double P0, double Qm = 1) :
-		ParticleBunch(P0, Qm)
+		ParticleBunch(P0, Qm, &(ParticleInfoDB.at("p")))
 	{
 	}
 
 	ProtonBunch(size_t np, const ParticleDistributionGenerator & generator, const BeamData& beam,
 		ParticleBunchFilter* filter = nullptr) :
-		ParticleBunch(np, generator, beam, filter)
+		ParticleBunch(np, generator, beam, filter, &(ParticleInfoDB.at("p")))
 	{
 	}
-
-	virtual bool IsStable() const;
-	virtual double GetParticleMass() const;
-	virtual double GetParticleMassMeV() const;
-	virtual double GetParticleLifetime() const;
 
 	void set()
 	{

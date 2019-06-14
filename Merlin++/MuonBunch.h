@@ -28,7 +28,7 @@ public:
 	 * Constructs a MuonBunch using the specified momentum, total charge and the particle array. Note that on exit, particles is empty.
 	 */
 	MuonBunch(double P0, double Q, PSvectorArray& particles) :
-		ParticleBunch(P0, Q, particles)
+		ParticleBunch(P0, Q, particles, &(ParticleInfoDB.at("muon-")))
 	{
 	}
 
@@ -36,7 +36,7 @@ public:
 	 * Read phase space vectors from specified input stream.
 	 */
 	MuonBunch(double P0, double Q, std::istream& is) :
-		ParticleBunch(P0, Q, is)
+		ParticleBunch(P0, Q, is, &(ParticleInfoDB.at("muon-")))
 	{
 	}
 
@@ -44,20 +44,15 @@ public:
 	 * Constructs an empty MuonBunch with the specified momentum P0 and charge per macro particle Qm (default = +1).
 	 */
 	MuonBunch(double P0, double Qm = 1) :
-		ParticleBunch(P0, Qm)
+		ParticleBunch(P0, Qm, &(ParticleInfoDB.at("muon-")))
 	{
 	}
 
 	MuonBunch(size_t np, const ParticleDistributionGenerator & generator, const BeamData& beam,
 		ParticleBunchFilter* filter = nullptr) :
-		ParticleBunch(np, generator, beam, filter)
+		ParticleBunch(np, generator, beam, filter, &(ParticleInfoDB.at("muon-")))
 	{
 	}
-
-	virtual bool IsStable() const;
-	virtual double GetParticleMass() const;
-	virtual double GetParticleMassMeV() const;
-	virtual double GetParticleLifetime() const;
 
 	void set()
 	{
