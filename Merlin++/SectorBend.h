@@ -206,6 +206,8 @@ public:
 	 */
 	double GetB1() const;
 
+	double GetBn(int n) const;
+
 	/**
 	 *	Sets the main dipole field (in Tesla).
 	 */
@@ -220,6 +222,8 @@ public:
 	 *	gradient in Tesla/meter.
 	 */
 	void SetB1(double b1);
+
+	void SetBn(int n, double bn);
 
 	// Data Members for Class Attributes
 
@@ -236,6 +240,7 @@ public:
 	{
 		SetB0(b);
 	}
+
 	double GetFieldStrength() const
 	{
 		return GetB0();

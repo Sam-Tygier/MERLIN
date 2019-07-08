@@ -426,6 +426,7 @@ vector<AcceleratorComponent*> SBendComponent::GetInstance(DataTableRow& MADinput
 	double length = MADinputrow.Get_d("L");
 	double angle = MADinputrow.Get_d("ANGLE");
 	double k1l = MADinputrow.Get_d("K1L");
+	double k2l = MADinputrow.Get_d("K2L");
 	double tilt = MADinputrow.Get_d("TILT");
 	double h = angle / length;
 
@@ -433,6 +434,9 @@ vector<AcceleratorComponent*> SBendComponent::GetInstance(DataTableRow& MADinput
 
 	if(k1l)
 		bend->SetB1(brho * k1l / length);
+
+	if(k2l)
+		bend->SetBn(2, brho * k2l / length / 2);
 
 	double e1 = MADinputrow.Get_d("E1");
 	double e2 = MADinputrow.Get_d("E2");
