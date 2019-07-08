@@ -40,7 +40,17 @@ void Log(const string& tag, int depth, ostream& os)
 
 const vector<string> normal_coef_names = {"K0L", "K1L", "K2L", "K3L", "K4L"};
 const vector<string> skew_coef_names = {"KSL", "K1S", "K2S", "K3S", "K4S"};
+
+double factorial(int n)
+{
+	double f = n--;
+	while(n > 1)
+	{
+		f *= n--;
+	}
+	return (f == 0) ? 1 : f;
 }
+} // end anonymous namespace
 
 // Class MADInterface
 MADInterface::MADInterface(const string& madFileName, double P0) :
@@ -430,7 +440,7 @@ vector<AcceleratorComponent*> SBendComponent::GetInstance(unique_ptr<DataTable>&
 		bend->SetB1(brho * k1l / length);
 
 	if(k2l)
-		bend->SetBn(2, brho * k2l / length);
+		bend->SetBn(2, brho * k2l / length / 2);
 
 	double e1 = MADinput->Get_d("E1", id);
 	double e2 = MADinput->Get_d("E2", id);
@@ -513,7 +523,7 @@ vector<AcceleratorComponent*> RectMultipoleComponent::GetInstance(unique_ptr<Dat
 	{
 		double k = MADinput->Get_d(normal_coef_names[n], id);
 		if(k != 0)
-			field.SetComponent(n, k * brho / length);
+			field.SetComponent(n, k * brho / length / factorial(n));
 	}
 
 	return {elem};
