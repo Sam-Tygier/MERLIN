@@ -101,3 +101,13 @@ void SectorBend::SetB1(double b1)
 {
 	GetField().SetComponent(1, b1);
 }
+
+double SectorBend::GetBn(int n) const
+{
+	return GetField().GetComponent(n).real();
+}
+
+void SectorBend::SetBn(int n, double bn)
+{
+	GetField().SetComponent(n, bn);
+}
