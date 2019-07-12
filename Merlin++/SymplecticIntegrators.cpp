@@ -873,7 +873,7 @@ void SectorBendCI_ef::TrackStep(double ds)
 
 	MultipoleField& field = currentComponent->GetField();
 	const double P0 = currentBunch->GetReferenceMomentum();
-	const double q = currentBunch->GetChargeSign();
+	const double q = currentBunch->GetParticleCharge();
 	const double Pref = currentComponent->GetMatchedMomentum(q);
 	const double brho = P0 / eV / SpeedOfLight;
 	int np = field.HighestMultipole();
