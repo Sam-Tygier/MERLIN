@@ -96,10 +96,14 @@ void LatticeFunction::Derivative(LatticeFunction* lfnM, LatticeFunction* lfnP, d
 	}
 }
 
-LatticeFunctionTable::LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum) :
+LatticeFunctionTable::LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum, const ParticleInfo* pi) :
 	theModel(aModel), p0(refMomentum), delta(1.0e-8), bendscale(0), symplectify(false), orbitonly(true)
 {
 	UseDefaultFunctions();
+	if(pi)
+	{
+		particle_info = pi;
+	}
 }
 
 struct DeleteLatticeFunction
@@ -329,7 +333,7 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	}
 	else
 	{
-		ClosedOrbit co(theModel, p0);
+		ClosedOrbit co(theModel, p0, particle_info);
 		co.SetDelta(delta);
 		co.TransverseOnly(true);
 		co.ScaleBendPathLength(cscale);
@@ -343,7 +347,7 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	}
 	else
 	{
-		TransferMatrix tm(theModel, p0);
+		TransferMatrix tm(theModel, p0, particle_info);
 		tm.SetDelta(delta);
 		tm.ScaleBendPathLength(cscale);
 		tm.FindTM(M, p);
@@ -409,7 +413,7 @@ double LatticeFunctionTable::DoCalculate(double cscale, PSvector* pInit, RealMat
 	nfile << endl;
 	MatrixForm(N, nfile, OPFormat().precision(6).fixed());
 
-	ParticleBunch* particle = new ParticleBunch(p0, 1.0);
+	ParticleBunch* particle = new ParticleBunch(p0, 1.0, particle_info);
 	particle->push_back(p);
 	particle->push_back(p);
 
@@ -515,13 +519,13 @@ double LatticeFunctionTable::DoCalculateOrbitOnly(double cscale, PSvector* pInit
 	}
 	else
 	{
-		ClosedOrbit co(theModel, p0);
+		ClosedOrbit co(theModel, p0, particle_info);
 		co.SetDelta(delta);
 		co.ScaleBendPathLength(cscale);
 		co.FindClosedOrbit(p);
 	}
 
-	ParticleBunch* particle = new ParticleBunch(p0, 1.0);
+	ParticleBunch* particle = new ParticleBunch(p0, 1.0, particle_info);
 	particle->push_back(p);
 
 	ParticleTracker tracker(theModel->GetBeamline(), particle);

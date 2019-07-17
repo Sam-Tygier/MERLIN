@@ -11,13 +11,14 @@
 #include "AcceleratorModel.h"
 #include "PSTypes.h"
 #include "TLAS.h"
+#include "ParticleInfo.h"
 
 using namespace TLAS;
 
 class TransferMatrix
 {
 public:
-	TransferMatrix(AcceleratorModel* aModel, double refMomentum);
+	TransferMatrix(AcceleratorModel* aModel, double refMomentum, const ParticleInfo* pi = nullptr);
 
 	void FindTM(RealMatrix& M);
 	void FindTM(RealMatrix& M, PSvector& orbit);
@@ -43,6 +44,7 @@ private:
 	double radstepsize;
 	int radnumsteps;
 	double bendscale;
+	const ParticleInfo* particle_info = &default_particle;
 
 };
 

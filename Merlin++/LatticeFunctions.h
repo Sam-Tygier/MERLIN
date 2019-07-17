@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "PSvector.h"
+#include "ParticleInfo.h"
 
 class LatticeFunction
 {
@@ -37,7 +38,7 @@ typedef std::vector<LatticeFunction*> vectorlfn;
 class LatticeFunctionTable
 {
 public:
-	LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum);
+	LatticeFunctionTable(AcceleratorModel* aModel, double refMomentum, const ParticleInfo* pi = nullptr);
 	~LatticeFunctionTable();
 	void AddFunction(int i, int j, int k);
 	void UseDefaultFunctions();
@@ -76,6 +77,7 @@ private:
 	bool symplectify;
 	bool orbitonly;
 	bool forcelongstab = false;
+	const ParticleInfo* particle_info = &default_particle;
 
 	vectorlfn lfnlist;
 

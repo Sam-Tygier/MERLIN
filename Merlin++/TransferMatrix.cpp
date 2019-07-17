@@ -15,9 +15,13 @@
 
 using namespace ParticleTracking;
 
-TransferMatrix::TransferMatrix(AcceleratorModel* aModel, double refMomentum) :
+TransferMatrix::TransferMatrix(AcceleratorModel* aModel, double refMomentum, const ParticleInfo* pi) :
 	theModel(aModel), p0(refMomentum), radiation(false), obspnt(0), delta(1.0e-9), bendscale(0)
 {
+	if(pi)
+	{
+		particle_info = pi;
+	}
 }
 
 void TransferMatrix::Radiation(bool flag)
@@ -59,7 +63,7 @@ void TransferMatrix::ScaleBendPathLength(double scale)
 void TransferMatrix::FindTM(RealMatrix& M)
 {
 	PSvector p(0);
-	ClosedOrbit co(theModel, p0);
+	ClosedOrbit co(theModel, p0, particle_info);
 	co.Radiation(radiation);
 
 	if(radstepsize == 0)
@@ -82,7 +86,7 @@ void TransferMatrix::FindTM(RealMatrix& M)
 
 void TransferMatrix::FindClosedOrbitTM(RealMatrix& M, PSvector& orbit)
 {
-	ClosedOrbit co(theModel, p0);
+	ClosedOrbit co(theModel, p0, particle_info);
 	co.Radiation(radiation);
 
 	if(radstepsize == 0)
@@ -105,7 +109,7 @@ void TransferMatrix::FindClosedOrbitTM(RealMatrix& M, PSvector& orbit)
 
 void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 {
-	ParticleBunch bunch(p0, 1.0);
+	ParticleBunch bunch(p0, 1.0, particle_info);
 	int k = 0;
 	for(k = 0; k < 7; k++)
 	{
@@ -145,9 +149,9 @@ void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 		tracker.AddProcess(ringdt);
 	}
 
-	tracker.Run();
+	tracker.Track(&bunch);
 
-	ParticleBunch::const_iterator ip = tracker.GetTrackedBunch().begin();
+	ParticleBunch::const_iterator ip = bunch.begin();
 	const Particle& pref = *ip++;
 
 	for(k = 0; k < 6; k++, ip++)
@@ -165,7 +169,7 @@ void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit)
 
 void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit, int n1, int n2)
 {
-	ParticleBunch bunch(p0, 1.0);
+	ParticleBunch bunch(p0, 1.0, particle_info);
 	int k = 0;
 	for(k = 0; k < 7; k++)
 	{
@@ -203,9 +207,9 @@ void TransferMatrix::FindTM(RealMatrix& M, PSvector& orbit, int n1, int n2)
 		tracker.AddProcess(ringdt);
 	}
 
-	tracker.Run();
+	tracker.Track(&bunch);
 
-	ParticleBunch::const_iterator ip = tracker.GetTrackedBunch().begin();
+	ParticleBunch::const_iterator ip = bunch.begin();
 	const Particle& pref = *ip++;
 
 	for(k = 0; k < 6; k++, ip++)

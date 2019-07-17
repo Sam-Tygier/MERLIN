@@ -19,10 +19,14 @@ using namespace std;
 using namespace TLAS;
 using namespace ParticleTracking;
 
-ClosedOrbit::ClosedOrbit(AcceleratorModel* aModel, double refMomentum) :
+ClosedOrbit::ClosedOrbit(AcceleratorModel* aModel, double refMomentum, const ParticleInfo* pi) :
 	theModel(aModel), p0(refMomentum), transverseOnly(false), radiation(false), useFullAcc(false), delta(1.0e-9), tol(
 		1.0e-26), max_iter(20), bendscale(0), theTracker(new ParticleTracker)
 {
+	if(pi)
+	{
+		particle_info = pi;
+	}
 }
 
 ClosedOrbit::~ClosedOrbit()
@@ -91,7 +95,7 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 {
 	const int cpt = transverseOnly ? 4 : 6;
 
-	ParticleBunch bunch(p0, 1.0);
+	ParticleBunch bunch(p0, 1.0, particle_info);
 	int k = 0;
 	for(k = 0; k < cpt + 1; k++)
 	{
@@ -144,6 +148,7 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 #ifdef DEBUG_CLOSED_ORBIT
 	cout << "Finding closed orbit:" << endl;
 	NANproc = new NANCheckProcess();
+	NANproc->SetDetailed();
 	theTracker->AddProcess(NANproc);
 #endif
 
@@ -164,9 +169,9 @@ void ClosedOrbit::FindClosedOrbit(PSvector& particle, int ncpt)
 			}
 		}
 
-		theTracker->Run();
+		theTracker->Track(&bunch);
 
-		ip = theTracker->GetTrackedBunch().begin();
+		ip = bunch.begin();
 		const Particle& p_ref = *ip++; // reference particle
 
 #ifdef DEBUG_CLOSED_ORBIT
