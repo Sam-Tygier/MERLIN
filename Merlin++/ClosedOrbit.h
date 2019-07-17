@@ -12,13 +12,14 @@
 #include "ParticleTracker.h"
 #include "ParticleBunchProcess.h"
 #include "PSTypes.h"
+#include "ParticleInfo.h"
 
 using namespace ParticleTracking;
 
 class ClosedOrbit
 {
 public:
-	ClosedOrbit(AcceleratorModel* aModel, double refMomentum);
+	ClosedOrbit(AcceleratorModel* aModel, double refMomentum, const ParticleInfo* pi = nullptr);
 	~ClosedOrbit();
 
 	void FindClosedOrbit(PSvector& particle, int ncpt = 0);
@@ -59,6 +60,7 @@ private:
 	int radnumsteps;
 	double bendscale;
 	ParticleTracker* theTracker;
+	const ParticleInfo* particle_info = &default_particle;
 };
 
 #endif
