@@ -16,6 +16,7 @@
 #include "ParticleDistributionGenerator.h"
 #include "BeamData.h"
 #include "BunchFilter.h"
+#include "MerlinException.h"
 
 #ifdef MERLIN_PROFILE
 #include "MerlinProfile.h"
@@ -410,6 +411,16 @@ void ParticleBunch::SetCentroid(const Particle& x0)
 {
 	FirstParticle() = x0;
 	SetCentroid();
+}
+
+void ParticleBunch::SetMacroParticleCharge(double q)
+{
+	cout << "ParticleBunch::SetMacroParticleCharge " << q << " " << GetParticleCharge() << endl;
+	if(q * GetParticleCharge() < 0.0)
+	{
+		throw MerlinException("MacroParticleCharge must be same sign as particle.");
+	}
+	qPerMP = q;
 }
 
 //MPI code
