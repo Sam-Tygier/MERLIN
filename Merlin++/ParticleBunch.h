@@ -306,12 +306,6 @@ inline size_t ParticleBunch::AddParticle(const Particle& p)
 	return size();
 }
 
-inline void ParticleBunch::SetMacroParticleCharge(double q)
-{
-	qPerMP = q;
-	SetChargeSign(q);
-}
-
 inline ParticleBunch::iterator ParticleBunch::begin()
 {
 	return pArray.begin();
