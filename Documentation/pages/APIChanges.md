@@ -15,6 +15,20 @@ Merlin++ moves to the C++14 standard.
 
 MerlinException is now derived from std::runtime_error, and follows the design of exceptions in the C++ standard library. New exception types in Merlin should derive from MerlinException and set an appropriate message either by passing a string to the MerlinException constructor or by overriding the what() method. The MerlinException.what() method should be used in place of the deprecated MerlinException.Msg()
 
+### DataTable changes
+
+DataTableReader::Read() functions such as DataTableReaderTFS::Read() now return a DataTable rather than a unique_ptr<DataTable>. In C++14 it is trivial to convert objects into unique_ptr when needed using make_unique. For example instead of
+
+    unique_ptr<DataTable> dt(DataTableReaderTFS(InputFileName).Read());
+
+use
+
+    auto dt = make_unique<DataTable>(DataTableReaderTFS(InputFileName).Read());
+
+or if a pointer is not needed, just use the object
+
+    auto dt = DataTableReaderTFS(InputFileName).Read();
+
 ## Version 5.02 {#APIChanges502}
 
 Merlin++ moves to the C++11 standard.
@@ -37,7 +51,11 @@ This achieves the same by directly changing the R_55 transfer matrix element.
 
 ### MADInterface changes
 
+<<<<<<< HEAD
 The MADInterface class has been refactored to utilize the newly developed and versitile DataTable container class. Moreover, the ConstructApertures function has been removed as it was a redundant function designed for direct aperture construction from a MAD input file. The function was also notably incomplete and buggy. All intended functionality is still provided via the ApertureConfiguration class, which has been also been redesigned for simplicity and modularity.
+=======
+The MADInterface class has been refactored to utilize the newly developed and versatile DataTable container class. Moreover, the ConstructApertures function has been removed as it was a redundant function designed for direct aperture construction from a MAD input file. The function was also notably incomplete and buggy. All intended functionality is still provided via the ApertureConfiguration class, which has been also been redesigned for simplicity and modularity.
+>>>>>>> sam-dev-datatable2
 
 ### ApertureConfiguration changes
 
