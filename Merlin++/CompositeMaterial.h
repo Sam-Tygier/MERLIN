@@ -14,8 +14,6 @@
 
 #include "Material.h"
 
-using namespace std;
-
 /**
  * A CompositeMaterial is a composite of assorted materials
  * and contains a map of constituent materials.
@@ -75,8 +73,8 @@ public:
 
 	// Define accessors
 	double GetAtomicNumber() const;
-	string GetName() const;
-	string GetSymbol() const;
+	std::string GetName() const;
+	std::string GetSymbol() const;
 	double GetAtomicMass() const;
 	double GetConductivity() const;
 	double GetRadiationLength() const;
@@ -139,7 +137,7 @@ public:
 	/**
 	 * Return list of constituent element symbols as strings
 	 */
-	vector<pair<string, double> > GetConstituentElements();
+	std::vector<std::pair<std::string, double> > GetConstituentElements();
 
 private:
 

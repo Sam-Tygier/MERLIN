@@ -36,7 +36,7 @@ MaterialDatabase::MaterialDatabase()
 	Be->SetMeanExcitationEnergy(63.7 * eV);
 	Be->SetElectronDensity(Be->CalculateElectronDensity());
 	Be->SetPlasmaEnergy(Be->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Be->GetSymbol(), Be));
+	db.insert(std::pair<std::string, Material*>(Be->GetSymbol(), Be));
 
 	//Carbon (graphite)
 	Material* C = new Material();
@@ -55,7 +55,7 @@ MaterialDatabase::MaterialDatabase()
 	C->SetMeanExcitationEnergy(78.0 * eV);
 	C->SetElectronDensity(C->CalculateElectronDensity());
 	C->SetPlasmaEnergy(C->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(C->GetSymbol(), C));
+	db.insert(std::pair<std::string, Material*>(C->GetSymbol(), C));
 
 	//Oxygen (note the density, etc is for liquid)!
 	//Some of these parameters are rather invalid
@@ -76,7 +76,7 @@ MaterialDatabase::MaterialDatabase()
 	O->SetMeanExcitationEnergy(95.0 * eV);
 	O->SetElectronDensity(O->CalculateElectronDensity());
 	O->SetPlasmaEnergy(O->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(O->GetSymbol(), O));
+	db.insert(std::pair<std::string, Material*>(O->GetSymbol(), O));
 
 	//Aluminium
 	Material* Al = new Material();
@@ -95,7 +95,7 @@ MaterialDatabase::MaterialDatabase()
 	Al->SetMeanExcitationEnergy(166.0 * eV);
 	Al->SetElectronDensity(Al->CalculateElectronDensity());
 	Al->SetPlasmaEnergy(Al->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Al->GetSymbol(), Al));
+	db.insert(std::pair<std::string, Material*>(Al->GetSymbol(), Al));
 
 	//Iron
 	Material* Fe = new Material();
@@ -114,7 +114,7 @@ MaterialDatabase::MaterialDatabase()
 	Fe->SetMeanExcitationEnergy(286.0 * eV);
 	Fe->SetElectronDensity(Fe->CalculateElectronDensity());
 	Fe->SetPlasmaEnergy(Fe->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Fe->GetSymbol(), Fe));
+	db.insert(std::pair<std::string, Material*>(Fe->GetSymbol(), Fe));
 
 	//Nickel
 	Material* Ni = new Material();
@@ -133,7 +133,7 @@ MaterialDatabase::MaterialDatabase()
 	Ni->SetMeanExcitationEnergy(311.0 * eV);
 	Ni->SetElectronDensity(Ni->CalculateElectronDensity());
 	Ni->SetPlasmaEnergy(Ni->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Ni->GetSymbol(), Ni));
+	db.insert(std::pair<std::string, Material*>(Ni->GetSymbol(), Ni));
 
 	//Copper
 	Material* Cu = new Material();
@@ -152,7 +152,7 @@ MaterialDatabase::MaterialDatabase()
 	Cu->SetMeanExcitationEnergy(322.0 * eV);
 	Cu->SetElectronDensity(Cu->CalculateElectronDensity());
 	Cu->SetPlasmaEnergy(Cu->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Cu->GetSymbol(), Cu));
+	db.insert(std::pair<std::string, Material*>(Cu->GetSymbol(), Cu));
 
 	//Molybdenum
 	Material* Mo = new Material();
@@ -171,7 +171,7 @@ MaterialDatabase::MaterialDatabase()
 	Mo->SetMeanExcitationEnergy(424.0 * eV);
 	Mo->SetElectronDensity(Mo->CalculateElectronDensity());
 	Mo->SetPlasmaEnergy(Mo->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Mo->GetSymbol(), Mo));
+	db.insert(std::pair<std::string, Material*>(Mo->GetSymbol(), Mo));
 
 	//Tungsten
 	Material* W = new Material();
@@ -190,7 +190,7 @@ MaterialDatabase::MaterialDatabase()
 	W->SetMeanExcitationEnergy(727.0 * eV);
 	W->SetElectronDensity(W->CalculateElectronDensity());
 	W->SetPlasmaEnergy(W->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(W->GetSymbol(), W));
+	db.insert(std::pair<std::string, Material*>(W->GetSymbol(), W));
 
 	//Lead
 	Material* Pb = new Material();
@@ -209,7 +209,7 @@ MaterialDatabase::MaterialDatabase()
 	Pb->SetMeanExcitationEnergy(823.0 * eV);
 	Pb->SetElectronDensity(Pb->CalculateElectronDensity());
 	Pb->SetPlasmaEnergy(Pb->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(Pb->GetSymbol(), Pb));
+	db.insert(std::pair<std::string, Material*>(Pb->GetSymbol(), Pb));
 
 	/*
 	 * Other assorted materials
@@ -240,7 +240,7 @@ MaterialDatabase::MaterialDatabase()
 	AC150K->SetMeanExcitationEnergy(78.0 * eV);
 	AC150K->SetElectronDensity(AC150K->CalculateElectronDensity());
 	AC150K->SetPlasmaEnergy(AC150K->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(AC150K->GetSymbol(), AC150K));
+	db.insert(std::pair<std::string, Material*>(AC150K->GetSymbol(), AC150K));
 
 	/*
 	 * INERMET 180
@@ -262,7 +262,7 @@ MaterialDatabase::MaterialDatabase()
 	IT180->SetMeanExcitationEnergy(IT180->CalculateMeanExcitationEnergy());
 	IT180->SetElectronDensity(IT180->CalculateElectronDensity());
 	IT180->SetPlasmaEnergy(IT180->CalculatePlasmaEnergy());
-	db.insert(pair<string, Material*>(IT180->GetSymbol(), IT180));
+	db.insert(std::pair<std::string, Material*>(IT180->GetSymbol(), IT180));
 
 	/*
 	 * LHC TCLA/TCL material
@@ -314,7 +314,7 @@ Material* MaterialDatabase::FindMaterial(std::string symbol)
 bool MaterialDatabase::VerifyMaterials()
 {
 	bool verification = true;
-	std::map<string, Material*>::const_iterator MaterialIt;
+	std::map<std::string, Material*>::const_iterator MaterialIt;
 	MaterialIt = db.begin();
 	while(MaterialIt != db.end())
 	{
@@ -340,7 +340,7 @@ void MaterialDatabase::DumpMaterialProperties()
 	std::cout << std::setw(8) << "dEdx";
 	std::cout << std::endl;
 
-	std::map<string, Material*>::const_iterator MaterialIt;
+	std::map<std::string, Material*>::const_iterator MaterialIt;
 	MaterialIt = db.begin();
 	while(MaterialIt != db.end())
 	{

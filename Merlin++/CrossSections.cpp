@@ -20,6 +20,7 @@
 #include "PhysicalConstants.h"
 #include "NumericalConstants.h"
 
+using namespace std;
 using namespace PhysicalUnits;
 using namespace PhysicalConstants;
 using namespace ParticleTracking;
