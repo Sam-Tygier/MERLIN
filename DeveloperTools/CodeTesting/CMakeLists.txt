@@ -62,6 +62,9 @@ merlin_test(BasicTests random_test random_test.cpp)
 merlin_test_py(BasicTests random_test.py)
 add_test_t(random_test.py BasicTests/random_test.py)
 
+merlin_test(BasicTests particle_test particle_test.cpp)
+add_test_t(particle_test BasicTests/particle_test)
+
 merlin_test(OpticsTests lhc_optics_test lhc_optics_test.cpp)
 add_test_t(lhc_optics_test OpticsTests/lhc_optics_test)
 
