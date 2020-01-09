@@ -9,16 +9,18 @@
 #define ProtonBunch_h 1
 
 #include "ParticleBunch.h"
+#include "PhysicalConstants.h"
 #include <iostream>
 
 using namespace ParticleTracking;
+
 namespace ParticleTracking
 {
-
 class ProtonBunch: public ParticleBunch
 {
 	static const int ntally = 6;
 	int tally[ntally];
+	static const ParticleInfo partinfo;
 
 public:
 
@@ -28,7 +30,7 @@ public:
 	 * particles is empty.
 	 */
 	ProtonBunch(double P0, double Q, PSvectorArray& particles) :
-		ParticleBunch(P0, Q, particles)
+		ParticleBunch(P0, Q, particles, &partinfo)
 	{
 	}
 
@@ -36,7 +38,7 @@ public:
 	 * Read phase space vectors from specified input stream.
 	 */
 	ProtonBunch(double P0, double Q, std::istream& is) :
-		ParticleBunch(P0, Q, is)
+		ParticleBunch(P0, Q, is, &partinfo)
 	{
 	}
 
@@ -46,20 +48,15 @@ public:
 	 *  +1).
 	 */
 	ProtonBunch(double P0, double Qm = 1) :
-		ParticleBunch(P0, Qm)
+		ParticleBunch(P0, Qm, &partinfo)
 	{
 	}
 
 	ProtonBunch(size_t np, const ParticleDistributionGenerator & generator, const BeamData& beam,
 		ParticleBunchFilter* filter = nullptr) :
-		ParticleBunch(np, generator, beam, filter)
+		ParticleBunch(np, generator, beam, filter, &partinfo)
 	{
 	}
-
-	virtual bool IsStable() const;
-	virtual double GetParticleMass() const;
-	virtual double GetParticleMassMeV() const;
-	virtual double GetParticleLifetime() const;
 
 	void set()
 	{
@@ -76,6 +73,8 @@ public:
 	}
 
 }; // end ProtonBunch class
+
+const ParticleInfo ProtonBunch::partinfo = ParticleInfo(PhysicalConstants::ProtonMass, 1);
 
 } // end namespace ParticleTracking
 #endif

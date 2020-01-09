@@ -9,15 +9,16 @@
 #define ElectronBunch_h 1
 
 #include "ParticleBunch.h"
+#include "PhysicalConstants.h"
 #include <iostream>
 
 namespace ParticleTracking
 {
-
 class ElectronBunch: public ParticleBunch
 {
 	static const int ntally = 6;
 	int tally[ntally];
+	static const ParticleInfo partinfo;
 
 public:
 
@@ -27,7 +28,7 @@ public:
 	 *	particles is empty.
 	 */
 	ElectronBunch(double P0, double Q, PSvectorArray& particles) :
-		ParticleBunch(P0, Q, particles)
+		ParticleBunch(P0, Q, particles, &partinfo)
 	{
 	}
 
@@ -35,7 +36,7 @@ public:
 	 *	Read phase space vectors from specified input stream.
 	 */
 	ElectronBunch(double P0, double Q, std::istream& is) :
-		ParticleBunch(P0, Q, is)
+		ParticleBunch(P0, Q, is, &partinfo)
 	{
 	}
 
@@ -45,20 +46,15 @@ public:
 	 *	+1).
 	 */
 	ElectronBunch(double P0, double Qm = 1) :
-		ParticleBunch(P0, Qm)
+		ParticleBunch(P0, Qm, &partinfo)
 	{
 	}
 
 	ElectronBunch(size_t np, const ParticleDistributionGenerator & generator, const BeamData& beam,
 		ParticleBunchFilter* filter = nullptr) :
-		ParticleBunch(np, generator, beam, filter)
+		ParticleBunch(np, generator, beam, filter, &partinfo)
 	{
 	}
-
-	virtual bool IsStable() const;
-	virtual double GetParticleMass() const;
-	virtual double GetParticleMassMeV() const;
-	virtual double GetParticleLifetime() const;
 
 	void set()
 	{
@@ -76,5 +72,6 @@ public:
 		std::cout << std::endl;
 	}
 }; // end ElectronBunch class
+const ParticleInfo ElectronBunch::partinfo = ParticleInfo(PhysicalConstants::ElectronMass, -1);
 } // end namespace ParticleTracking
 #endif

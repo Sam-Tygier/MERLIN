@@ -35,7 +35,7 @@ public:
 	 *	Constructor taking the initial reference momentum in Ge
 	 *	V/c, and the total charge/e of the bunch.
 	 */
-	Bunch(double p, double q);
+	Bunch(double p, double q, const ParticleInfo* ptype = &default_particle);
 
 	/**
 	 *	virtual destructor.
@@ -91,8 +91,8 @@ public:
 	virtual bool ApplyTransformation(const Transform3D& t) = 0;
 };
 
-inline Bunch::Bunch(double p, double q) :
-	ReferenceParticle(p, q)
+inline Bunch::Bunch(double p, double q, const ParticleInfo* ptype) :
+	ReferenceParticle(p, q, ptype)
 {
 }
 

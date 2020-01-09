@@ -9,6 +9,7 @@
 #define ReferenceParticle_h 1
 
 #include "merlin_config.h"
+#include "ParticleInfo.h"
 #include "utils.h"
 #include <cassert>
 
@@ -47,6 +48,14 @@ public:
 	 */
 	double GetChargeSign() const;
 
+	/// Charge of an individual particle
+	double GetParticleCharge() const;
+
+	/// Access method: Get particle mass
+	double GetParticleMass() const;
+
+	/// Access method: Get particle mass (MeV)
+	double GetParticleMassMeV() const;
 	/**
 	 *	Sets the reference momentum to p GeV/c. p must be
 	 *	greater than zero.
@@ -71,7 +80,7 @@ public:
 
 protected:
 
-	ReferenceParticle(double p, double q = 1);
+	ReferenceParticle(double p, double q = 1, const ParticleInfo* ptype = nullptr);
 
 	/**
 	 *	Sets the charge sign.
@@ -92,17 +101,18 @@ protected:
 	 */
 	double ct0;
 
-	/**
-	 *	The charge sign of the particles.
-	 */
-	double qs;
+	const ParticleInfo * type = &default_particle;
 };
 
-inline ReferenceParticle::ReferenceParticle(double p, double q) :
-	p0(p), ct0(0), qs(0.0)
+inline ReferenceParticle::ReferenceParticle(double p, double q, const ParticleInfo* ptype) :
+	p0(p), ct0(0)
 {
 	assert(p > 0);
 	SetChargeSign(q);
+	if(ptype != nullptr) // override q
+	{
+		type = ptype;
+	}
 }
 
 inline double ReferenceParticle::GetReferenceMomentum() const
@@ -117,7 +127,27 @@ inline double ReferenceParticle::GetReferenceTime() const
 
 inline double ReferenceParticle::GetChargeSign() const
 {
-	return qs;
+	const double &charge = type->charge;
+	if(charge > 0)
+		return 1;
+	else if(charge < 0)
+		return -1;
+	return 0;
+}
+
+inline double ReferenceParticle::GetParticleCharge() const
+{
+	return type->charge;
+}
+
+inline double ReferenceParticle::GetParticleMass() const
+{
+	return type->mass;
+}
+
+inline double ReferenceParticle::GetParticleMassMeV() const
+{
+	return type->GetMassMev();
 }
 
 inline void ReferenceParticle::SetReferenceMomentum(double p)
@@ -146,17 +176,17 @@ inline double ReferenceParticle::IncrReferenceTime(double dct)
 
 inline void ReferenceParticle::SetChargeSign(double q)
 {
-	if(q < 0)
+	if(q > 0)
 	{
-		qs = -1;
+		type = &default_particle;
 	}
-	else if(fequal(q, 0.0))
+	else if(q < 0)
 	{
-		qs = 0;
+		type = &default_particle_negative;
 	}
 	else
 	{
-		qs = 1;
+		type = &default_particle_neutral;
 	}
 }
 

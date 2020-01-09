@@ -8,8 +8,12 @@
 #include <iostream>
 
 #include "ParticleInfoDB.h"
+#include "ParticleBunch.h"
+#include "ProtonBunch.h"
+#include "ElectronBunch.h"
 
 using namespace std;
+using namespace ParticleTracking;
 int main(int argc, char* argv[])
 {
 	auto pdb = ParticleInfoDB();
@@ -29,4 +33,15 @@ int main(int argc, char* argv[])
 	p_p = pdb.FindParticle("pbar");
 	assert_close(p_p->mass, 1.672621637e-27, 1e-40);
 	assert(p_p->charge == -1);
+
+	auto b_e = ParticleBunch(100, -10, pdb.FindParticle("e"));
+	assert(b_e.GetParticleCharge() == -1);
+	auto b_p = ParticleBunch(100, 10, pdb.FindParticle("p"));
+	assert_close(b_p.GetParticleMassMeV(), 938.272013, 1e-6);
+
+	auto bp_p = ProtonBunch(100, 10);
+	assert_close(bp_p.GetParticleMassMeV(), 938.272013, 1e-6);
+
+	auto be_e = ElectronBunch(100, 10);
+	assert_close(be_e.GetParticleMassMeV(), 0.510998910, 1e-9);
 }
