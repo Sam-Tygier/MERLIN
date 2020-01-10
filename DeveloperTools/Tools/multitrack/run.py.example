@@ -25,6 +25,7 @@ trackers = [
 {"name":"merlin_madinterface_sym", "f":merlin_madinterface.track_particles, "settings":{"int_mode":"symplectic"}},
 #{"name":"merlin_madinterface_sym_ef", "f":merlin_madinterface.track_particles, "settings":{"int_mode":"symplectic_ef"}},
 #{"name":"merlin_madinterface_tran", "f":merlin_madinterface.track_particles, "settings":{"int_mode":"transport"}},
+#{"name":"merlin_alpha_thin", "f":merlin_madinterface.track_particles, "settings":{"int_mode":"thin", "particle":"alpha"}},
 ]
 
 # select elements to use

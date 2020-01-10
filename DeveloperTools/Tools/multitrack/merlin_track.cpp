@@ -16,6 +16,7 @@
 
 #include "ParticleTracker.h"
 #include "ParticleBunchTypes.h"
+#include "ParticleInfoDB.h"
 
 #include "PhysicalUnits.h"
 #include "PhysicalConstants.h"
@@ -94,13 +95,27 @@ int main(int argc, char* argv[])
 	double beam_energy = stod(settings["energy"]);
 	const double brho = beam_energy / eV / SpeedOfLight;
 
-	if(settings["particle"] != "proton")
+	auto pdb = ParticleInfoDB();
+	const ParticleInfo* pi;
+	if(settings["particle"] == "proton")
 	{
-		cerr << "merlin_track.cpp requires particle = proton" << endl;
+		pi = pdb.FindParticle("p");
+	}
+	else if(settings["particle"] == "deuteron")
+	{
+		pi = new ParticleInfo(ProtonMass * 2, 1);
+	}
+	else if(settings["particle"] == "alpha")
+	{
+		pi = new ParticleInfo(ProtonMass * 4, 2);
+	}
+	else
+	{
+		cerr << "merlin_track.cpp: unknown particle: " <<  settings["particle"] << endl;
 		return 1;
 	}
 
-	ProtonBunch* myBunch = new ProtonBunch(beam_energy, 1);
+	ParticleBunch* myBunch = new ParticleBunch(beam_energy, 1, pi);
 	AcceleratorComponent* element = nullptr;
 
 	bool use_madinterface = false;
@@ -160,8 +175,8 @@ int main(int argc, char* argv[])
 			if(k1l)
 				element_sb->SetB1(brho * k1l);
 
-			//if(k2l)
-			//	element_sb->SetBn(2, brho * k2l);
+			if(k2l)
+				element_sb->SetBn(2, brho * k2l);
 			element = element_sb;
 		}
 		else if(words[0] == "vkick")
@@ -196,7 +211,7 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 
-		MADInterface* myMADinterface = new MADInterface(madinterface_tfs_path, beam_energy);
+		MADInterface* myMADinterface = new MADInterface(madinterface_tfs_path, beam_energy, pi->charge);
 		model = myMADinterface->ConstructModel();
 		delete myMADinterface;
 	}
@@ -244,6 +259,11 @@ int main(int argc, char* argv[])
 	{
 		cout << "Using Integrator: TRANSPORT" << endl;
 		tracker->SetIntegratorSet(new ParticleTracking::TRANSPORT::StdISet());
+	}
+	else if(settings["int_mode"] == "thin")
+	{
+		cout << "Using Integrator: THIN_LENS" << endl;
+		tracker->SetIntegratorSet(new ParticleTracking::THIN_LENS::StdISet());
 	}
 	else
 	{
