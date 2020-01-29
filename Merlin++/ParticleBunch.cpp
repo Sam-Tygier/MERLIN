@@ -187,7 +187,13 @@ ParticleBunch::ParticleBunch(size_t np, const ParticleDistributionGenerator& gen
 	size_t filtered = 0;
 	while(i < np)
 	{
+		bool pass_filter = 1;
 		p = generator.GenerateFromDistribution();
+
+		if(filter != nullptr && !filter->filter_in_realspace)
+		{
+			pass_filter = filter->Apply(p);
+		}
 
 		// apply emittance
 		p.x() *= sqrt(beam.emit_x);
@@ -207,7 +213,12 @@ ParticleBunch::ParticleBunch(size_t np, const ParticleDistributionGenerator& gen
 		p.id() = i;
 		p.sd() = 0.0;
 
-		if(filter == nullptr || filter->Apply(p))
+		if(filter != nullptr && filter->filter_in_realspace)
+		{
+			pass_filter = filter->Apply(p);
+		}
+
+		if(pass_filter)
 		{
 			pArray.push_back(p);
 			i++;
