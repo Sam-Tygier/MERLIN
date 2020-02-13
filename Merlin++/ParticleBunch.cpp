@@ -184,7 +184,6 @@ ParticleBunch::ParticleBunch(size_t np, const ParticleDistributionGenerator& gen
 	pArray.push_back(p);
 
 	size_t i = 1;
-	size_t filtered = 0;
 	while(i < np)
 	{
 		bool pass_filter = 1;

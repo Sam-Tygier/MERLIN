@@ -196,6 +196,9 @@ public:
 	 */
 	int coords;
 
+	/// Number of particles filtered out by ParticleBunchFilter
+	size_t filtered = 0;
+
 #ifdef ENABLE_MPI
 	/**
 	 * Destructor - cleans up MPI code
