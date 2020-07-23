@@ -10,6 +10,7 @@ from __future__ import print_function
 
 import sys
 print("Python version", sys.version)
+print("Python path", sys.path)
 
 try:
 	import numpy
